@@ -1,3 +1,5 @@
+"use client";
+
 import {
   createContext,
   useCallback,
@@ -9,7 +11,7 @@ import {
 } from "react";
 import { messages, type Language, type Messages } from "./messages";
 
-const STORAGE_KEY = "devbhoomi-language";
+const STORAGE_KEY = "himalayan-horizon-language";
 
 type LanguageContextValue = {
   language: Language;
@@ -30,7 +32,9 @@ function readStoredLanguage(): Language {
 }
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<Language>(readStoredLanguage);
+  // Start in English so the server render and the first client render match.
+  // The saved choice is applied after mount to avoid a hydration mismatch.
+  const [language, setLanguageState] = useState<Language>("en");
 
   const setLanguage = useCallback((next: Language) => {
     setLanguageState(next);
@@ -39,6 +43,11 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     } catch {
       // The choice still applies for this visit even if it can't be saved.
     }
+  }, []);
+
+  useEffect(() => {
+    const saved = readStoredLanguage();
+    if (saved !== "en") setLanguageState(saved);
   }, []);
 
   useEffect(() => {
